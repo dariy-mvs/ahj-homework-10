@@ -1,0 +1,121 @@
+body {
+  color: #131111;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: rgb(221, 238, 240);
+  position: relative;
+}
+.content {
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.title {
+  text-align: center;
+}
+.post {
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 20px;
+  margin: 10px 0;
+}
+.textmessage {
+}
+.post__title {
+  font-weight: 500;
+  text-align: center;
+  color: rgb(27, 47, 27);
+}
+.post__text {
+  font-weight: 400;
+}
+.geoposition {
+  display: flex;
+  justify-content: space-between;
+}
+.form {
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 20px;
+}
+label {
+  display: flex;
+}
+.field, .popup__field {
+  flex: 1 1 auto;
+  border-radius: 5px;
+  border: 2px solid rgb(190, 210, 201);
+}
+.popup__field {
+  width: 100%;
+}
+.audio_btn, .video_btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background-color: rgb(190, 210, 201);
+  margin: 0 5px;
+  background-size: 35px;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+.video_btn {
+  background-image: url(../img/icons8-камера-100.png);
+}
+.audio_btn {
+  background-image: url(../img/icons8-микрофон-96.png);
+}
+.submit_btn, .popup__btn {
+  width: 250px;
+  height: 50px;
+  background-color: rgb(190, 210, 201);
+  border-radius: 5px;
+  margin-top: 15px;
+  border: none;
+}
+.modal {
+  width: 100%;
+  height: 100%; 
+  background-color: #00000072;
+  position: fixed;
+  top: 0;
+  left: 0;
+  /* display: none; */
+}
+.modal__popup {
+  width: 95%;
+  max-width: 800px;
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 20px;
+  box-sizing: border-box;
+  margin: 50px auto;
+}
+.popup__title {
+  text-align: center;
+}
+.popup__text {
+}
+.popup__form {
+}
+.popup__field {
+}
+.popup__btn {
+  display: block;
+}
+.errorfield {
+  border: 3px solid red;
+}
+label {
+  position: relative;
+}
+.timer {
+  position: absolute;
+  right: 40px;
+  top: 100%;
+}
