@@ -13,12 +13,26 @@ export default class Post {
     return postElem;
   }
 
+  static showOrHidden(selector, showIt) {
+    if (showIt) {
+      document.querySelector(selector).classList.remove('hidden');
+    } else {
+      document.querySelector(selector).classList.add('hidden');
+    }
+  }
+
   constructor() {
     this.textForm = document.querySelector('.form');
     this.textField = this.textForm.querySelector('.field');
     this.audioBtn = document.querySelector('.audio_btn');
     this.videoBtn = document.querySelector('.video_btn');
     this.container = document.querySelector('.posts');
+    this.timer = undefined;
+    this.stream = undefined;
+    this.chunks = undefined;
+    this.recorder = undefined;
+    this.timerEl = undefined;
+    this.mediaPost = Post.printMediaPost();
   }
 
   submitText() {
@@ -32,15 +46,49 @@ export default class Post {
     });
   }
 
-  recordingEvents(button, alertString, nameElement, isVideo) {
-    let timer;
-    let stream;
-    let chunks;
-    let recorder;
-    let timerEl;
-    let mediaPost = Post.printMediaPost();
-    button.addEventListener('mousedown', (e) => {
+  mediaSubmitOrCancelEvents() {
+    document.querySelector('.ok_btn').addEventListener('click', (e) => {
       e.preventDefault();
+      this.recorder.stop();
+      this.stream.getTracks().forEach((track) => track.stop());
+      this.timerEl.remove();
+      const positionedPost = new GetPosition(this.mediaPost);
+      this.container.insertAdjacentElement('beforeend', positionedPost.post);
+      setTimeout(() => {
+        this.timer = undefined;
+        this.chunks = undefined;
+        this.stream = undefined;
+        this.recorder = undefined;
+        this.timerEl = undefined;
+        this.mediaPost = Post.printMediaPost();
+        Post.showOrHidden('.audio_btn', true);
+        Post.showOrHidden('.video_btn', true);
+        Post.showOrHidden('.ok_btn', false);
+        Post.showOrHidden('.cancel_btn', false);
+      }, 700); // костыльное решение, но лучше я не придумала)) Буду рада вариантам
+    });
+
+    document.querySelector('.cancel_btn').addEventListener('click', () => {
+      this.timer = undefined;
+      this.chunks = undefined;
+      this.stream = undefined;
+      this.recorder = undefined;
+      this.timerEl = undefined;
+      this.mediaPost = Post.printMediaPost();
+      Post.showOrHidden('.audio_btn', true);
+      Post.showOrHidden('.video_btn', true);
+      Post.showOrHidden('.ok_btn', false);
+      Post.showOrHidden('.cancel_btn', false);
+    });
+  }
+
+  recordingEvents(button, alertString, nameElement, isVideo) {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      Post.showOrHidden('.audio_btn', false);
+      Post.showOrHidden('.video_btn', false);
+      Post.showOrHidden('.ok_btn', true);
+      Post.showOrHidden('.cancel_btn', true);
       (async () => {
         if (!navigator.mediaDevices) {
           alert(alertString);
@@ -49,22 +97,21 @@ export default class Post {
         try {
           const media = document.createElement(nameElement);
           media.controls = true;
-          mediaPost.insertAdjacentElement('beforeend', media);
+          this.mediaPost.insertAdjacentElement('beforeend', media);
           // Record:
           if (!window.MediaRecorder) {
             alert(alertString);
             return;
           }
-          stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
-          recorder = new MediaRecorder(stream);
-          chunks = [];
-          timerEl = Post.printTimer();
-          timerEl.textContent = '00:00';
-          recorder.addEventListener('start', () => {
-            button.insertAdjacentElement('afterend', timerEl);
-            timer = setInterval(() => {
-              let timeArr = timerEl.textContent.split(':');
-
+          this.stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
+          this.recorder = new MediaRecorder(this.stream);
+          this.chunks = [];
+          this.timerEl = Post.printTimer();
+          this.timerEl.textContent = '00:00';
+          this.recorder.addEventListener('start', () => {
+            button.insertAdjacentElement('afterend', this.timerEl);
+            this.timer = setInterval(() => {
+              let timeArr = this.timerEl.textContent.split(':');
               if (+timeArr[1] >= 60) {
                 timeArr[0] = +timeArr[0] + 1;
                 timeArr[1] = +timeArr[1];
@@ -78,42 +125,23 @@ export default class Post {
                 }
                 return `${el}`;
               }).join(':');
-              timerEl.textContent = timeArr;
+              this.timerEl.textContent = timeArr;
             }, 1000);
           });
-          recorder.addEventListener('dataavailable', (evt) => {
-            chunks.push(evt.data);
+          this.recorder.addEventListener('dataavailable', (evt) => {
+            this.chunks.push(evt.data);
           });
-          recorder.addEventListener('stop', () => {
-            console.log('recording stopped');
-            const blob = new Blob(chunks);
+          this.recorder.addEventListener('stop', () => {
+            const blob = new Blob(this.chunks);
             media.src = URL.createObjectURL(blob);
-            clearInterval(timer);
+            clearInterval(this.timer);
           });
-          recorder.start();
+          this.recorder.start();
         } catch (err) {
           alert(alertString);
         }
       })();
     });
-    button.addEventListener('mouseup', (e) => {
-      e.preventDefault();
-      recorder.stop();
-      stream.getTracks().forEach((track) => track.stop());
-      timerEl.remove();
-      const positionedPost = new GetPosition(mediaPost);
-      this.container.insertAdjacentElement('beforeend', positionedPost.post);
-      setTimeout(() => {
-        timer = undefined;
-        chunks = undefined;
-        stream = undefined;
-        recorder = undefined;
-        timerEl = undefined;
-        mediaPost = Post.printMediaPost();
-      }, 700); // костыльное решение, но лучше я не придумала)) Буду рада вариантам
-    });
-
-    button.addEventListener('click', (e) => { e.preventDefault(); });
   }
 
   printTextPost() {

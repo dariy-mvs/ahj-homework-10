@@ -53,7 +53,7 @@ label {
 .popup__field {
   width: 100%;
 }
-.audio_btn, .video_btn {
+.audio_btn, .video_btn, .cancel_btn, .ok_btn {
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -69,6 +69,12 @@ label {
 }
 .audio_btn {
   background-image: url(../img/icons8-микрофон-96.png);
+}
+.cancel_btn {
+  background-image: url(../img/kisspng-andres-law-offices-pc-llo-computer-icons-lance-a-forbidden-sign-svg-png-icon-free-download-275-8-5b7e1c866d4028.3137887015349914944475.png);
+}
+.ok_btn {
+  background-image: url(../img/kisspng-check-mark-symbol-clip-art-black-check-mark-5b13a571e7b721.5616987915280141939491.png);
 }
 .submit_btn, .popup__btn {
   width: 250px;
@@ -118,4 +124,7 @@ label {
   position: absolute;
   right: 40px;
   top: 100%;
+}
+.hidden {
+  display: none;
 }
