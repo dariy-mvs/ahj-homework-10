@@ -32,6 +32,7 @@ export default class Post {
     this.chunks = undefined;
     this.recorder = undefined;
     this.timerEl = undefined;
+    this.videoShowing = undefined;
     this.mediaPost = Post.printMediaPost();
   }
 
@@ -52,20 +53,6 @@ export default class Post {
       this.recorder.stop();
       this.stream.getTracks().forEach((track) => track.stop());
       this.timerEl.remove();
-      const positionedPost = new GetPosition(this.mediaPost);
-      this.container.insertAdjacentElement('beforeend', positionedPost.post);
-      setTimeout(() => {
-        this.timer = undefined;
-        this.chunks = undefined;
-        this.stream = undefined;
-        this.recorder = undefined;
-        this.timerEl = undefined;
-        this.mediaPost = Post.printMediaPost();
-        Post.showOrHidden('.audio_btn', true);
-        Post.showOrHidden('.video_btn', true);
-        Post.showOrHidden('.ok_btn', false);
-        Post.showOrHidden('.cancel_btn', false);
-      }, 700); // костыльное решение, но лучше я не придумала)) Буду рада вариантам
     });
 
     document.querySelector('.cancel_btn').addEventListener('click', () => {
@@ -89,6 +76,7 @@ export default class Post {
       Post.showOrHidden('.video_btn', false);
       Post.showOrHidden('.ok_btn', true);
       Post.showOrHidden('.cancel_btn', true);
+
       (async () => {
         if (!navigator.mediaDevices) {
           alert(alertString);
@@ -105,6 +93,16 @@ export default class Post {
           }
           this.stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
           this.recorder = new MediaRecorder(this.stream);
+          if (isVideo) {
+            this.videoShowing = (stream) => {
+              media.controls = true;
+              media.muted = 'muted';
+              media.className = 'video_window';
+              // this.container.querySelector('.modal').appendChild(media);
+              media.srcObject = stream;
+              media.play();
+            };
+          }
           this.chunks = [];
           this.timerEl = Post.printTimer();
           this.timerEl.textContent = '00:00';
@@ -127,6 +125,12 @@ export default class Post {
               }).join(':');
               this.timerEl.textContent = timeArr;
             }, 1000);
+            this.videoShowing();
+            (async () => {
+              await new GetPosition(this.mediaPost);
+              Post.printMediaPost();
+              this.container.insertAdjacentElement('beforeend', this.mediaPost);
+            })();
           });
           this.recorder.addEventListener('dataavailable', (evt) => {
             this.chunks.push(evt.data);
@@ -135,6 +139,15 @@ export default class Post {
             const blob = new Blob(this.chunks);
             media.src = URL.createObjectURL(blob);
             clearInterval(this.timer);
+            this.timer = undefined;
+            this.chunks = undefined;
+            this.stream = undefined;
+            this.recorder = undefined;
+            this.timerEl = undefined;
+            Post.showOrHidden('.audio_btn', true);
+            Post.showOrHidden('.video_btn', true);
+            Post.showOrHidden('.ok_btn', false);
+            Post.showOrHidden('.cancel_btn', false);
           });
           this.recorder.start();
         } catch (err) {

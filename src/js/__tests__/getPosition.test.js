@@ -29,3 +29,9 @@ test('validation5', () => {
   const validationValue = Modal.validationString(input);
   expect(validationValue).toBe(false);
 });
+
+test('validation6', () => {
+  const input = '[-511257- -0.12572]';
+  const validationValue = Modal.validationString(input);
+  expect(validationValue).toBe(false);
+});

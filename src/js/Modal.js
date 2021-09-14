@@ -1,6 +1,6 @@
 export default class Modal {
   static validationString(string) {
-    return /^\[?\d{1,2}.\d{4,20}, ?- ?\d{1,2}.\d{4,20}\]?$/g.test(string);
+    return /^-?\[?\d{1,2}.\d{4,20}, ?- ?-?\d{1,2}.\d{4,20}\]?$/g.test(string);
   }
 
   constructor(title, text, elt, positionElt) {
