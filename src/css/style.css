@@ -128,3 +128,16 @@ label {
 .hidden {
   display: none;
 }
+
+.posts {
+  position: relative;
+}
+
+.modal_video {
+  width: 80%;
+  max-width: 500px;
+  position: absolute;
+  top: 20px;
+  left: calc(50% - 250px);
+  z-index: 8;
+}

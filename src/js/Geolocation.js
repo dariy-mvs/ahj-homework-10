@@ -20,34 +20,35 @@ export default class GetPosition {
     return posElement;
   }
 
-  constructor(elt) {
-    this.post = elt;
-    this.navigatorDiagnostic();
-  }
-
-  navigatorDiagnostic() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { coords, timestamp } = position;
-          const { latitude, longitude } = coords;
-          const positionEl = GetPosition.printPositionElement(false, '', latitude, longitude, timestamp);
-          this.post.insertAdjacentElement('beforeend', positionEl);
-        }, () => {
-          this.setUserCoords();
-        },
-      );
-    } else {
-      this.setUserCoords();
-    }
-    return this.post;
-  }
-
-  setUserCoords() {
+  static setUserCoords(post) {
     const positionEl = GetPosition.printPositionElement(true, '', '', '', '');
-    const modal = new Modal('Нам не удалось определить Ваше местоположение', 'Возможно, Вы запретили это в настройках, или сеть недоступна. Пожалуйста, введите Ваши координаты в соответствующее поле.', this.post, positionEl);
+    const modal = new Modal('Нам не удалось определить Ваше местоположение', 'Возможно, Вы запретили это в настройках, или сеть недоступна. Пожалуйста, введите Ваши координаты в соответствующее поле.', post, positionEl);
     modal.addModal();
+  }
 
-    // this.post.insertAdjacentElement('beforeend', positionEl);
+  static async navigatorDiagnostic(post) {
+    const postWithPosition = post;
+    if (navigator.geolocation) {
+      await new Promise((res) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { coords, timestamp } = position;
+            const { latitude, longitude } = coords;
+            const positionEl = GetPosition.printPositionElement(false, '', latitude, longitude, timestamp);
+            postWithPosition.insertAdjacentElement('beforeend', positionEl);
+            res();
+          }, () => {
+            GetPosition.setUserCoords(postWithPosition);
+          },
+        );
+      });
+      return postWithPosition;
+    }
+    GetPosition.setUserCoords(postWithPosition);
+    return postWithPosition;
+  }
+
+  constructor() {
+    console.log('');
   }
 }

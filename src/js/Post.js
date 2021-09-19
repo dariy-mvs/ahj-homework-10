@@ -27,12 +27,13 @@ export default class Post {
     this.audioBtn = document.querySelector('.audio_btn');
     this.videoBtn = document.querySelector('.video_btn');
     this.container = document.querySelector('.posts');
+    this.modalVideo = document.querySelector('.modal_video');
     this.timer = undefined;
     this.stream = undefined;
     this.chunks = undefined;
     this.recorder = undefined;
     this.timerEl = undefined;
-    this.videoShowing = undefined;
+    // this.videoShowing = undefined;
     this.mediaPost = Post.printMediaPost();
   }
 
@@ -41,9 +42,11 @@ export default class Post {
     submitBtn.addEventListener('click', (e) => {
       e.preventDefault();
       const post = this.printTextPost();
-      const positionedPost = new GetPosition(post);
-      this.container.insertAdjacentElement('beforeend', positionedPost.post);
-      this.textField.value = '';
+      (async () => {
+        const positionedPost = await GetPosition.navigatorDiagnostic(post);
+        this.container.insertAdjacentElement('beforeend', positionedPost);
+        this.textField.value = '';
+      })();
     });
   }
 
@@ -94,14 +97,14 @@ export default class Post {
           this.stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
           this.recorder = new MediaRecorder(this.stream);
           if (isVideo) {
-            this.videoShowing = (stream) => {
-              media.controls = true;
-              media.muted = 'muted';
-              media.className = 'video_window';
-              // this.container.querySelector('.modal').appendChild(media);
-              media.srcObject = stream;
-              media.play();
-            };
+            const videoPopup = document.createElement('video');
+            videoPopup.controls = true;
+            videoPopup.muted = 'muted';
+            videoPopup.className = 'video_window';
+            this.modalVideo.classList.remove('hidden');
+            this.modalVideo.appendChild(videoPopup);
+            videoPopup.srcObject = this.stream;
+            videoPopup.play();
           }
           this.chunks = [];
           this.timerEl = Post.printTimer();
@@ -125,11 +128,12 @@ export default class Post {
               }).join(':');
               this.timerEl.textContent = timeArr;
             }, 1000);
-            this.videoShowing();
+            if (isVideo) {
+              // this.videoShowing();
+            }
             (async () => {
-              await new GetPosition(this.mediaPost);
+              await GetPosition.navigatorDiagnostic(this.mediaPost);
               Post.printMediaPost();
-              this.container.insertAdjacentElement('beforeend', this.mediaPost);
             })();
           });
           this.recorder.addEventListener('dataavailable', (evt) => {
@@ -148,6 +152,11 @@ export default class Post {
             Post.showOrHidden('.video_btn', true);
             Post.showOrHidden('.ok_btn', false);
             Post.showOrHidden('.cancel_btn', false);
+            if (isVideo) {
+              this.modalVideo.querySelector('video').remove();
+              this.modalVideo.classList.add('hidden');
+            }
+            this.container.insertAdjacentElement('beforeend', this.mediaPost);
           });
           this.recorder.start();
         } catch (err) {
